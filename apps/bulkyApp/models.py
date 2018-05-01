@@ -109,16 +109,55 @@ class User(models.Model):
 
 class Supplier(models.Model):
     company_name = models.CharField(max_length = 300)
+    american_headquarters = models.ForeignKey(Postal_Address, related_name="belongs_to")
+    contact_person = models.CharField(max_length = 150)
+    phone_number = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add = True)
+    updated_at = models.DateTimeField(auto_now = True)
+    def __str__(self):
+        return "Supplier: {} \n{} \n{} - {}".format(self.company_name, self.american_headquarters, self.contact_person, self.phone_number)
+
 
 class Item(models.Model):
     make = models.CharField(max_length = 100)
     model = models.CharField(max_length = 150)
     model_more_info = models.CharField(max_length = 150, blank = True)
     supplier = models.ForeignKey(Supplier, related_name = "items")
+    base_price = models.FloatField()
+    first_break_total = models.IntegerField()
+    first_break_price = models.FloatField()
+    second_break_total = models.IntegerField(blank = True)
+    second_break_price = models.FloatField(blank = True)
+    third_break_total = models.IntegerField(blank = True)
+    third_break_price = models.FloatField(blank = True)
+    fourth_break_total = models.IntegerField(blank = True)
+    fourth_break_price = models.FloatField(blank = True)
+    fifth_break_total = models.IntegerField(blank = True)
+    fifth_break_price = models.FloatField(blank = True)
     color = models.CharField(max_length = 30, blank = True)
+    created_at = models.DateTimeField(auto_now_add = True)
+    updated_at = models.DateTimeField(auto_now = True)
+    def __str__(self):
+        return "Item: {}, {}, {}, ${} \n {} - ${}".format(self.make, self.model, self.supplier, self.base_price, self.first_break_total, self.first_break_price)
 
 class Distribution_Center(models.Model):
     owned_by = models.ForeignKey(Supplier, related_name="distribution_centers")
+    address = models.ForeignKey(Postal_Address, related_name="belongs_to")
+    created_at = models.DateTimeField(auto_now_add = True)
+    updated_at = models.DateTimeField(auto_now = True)
+    def __str__(self):
+        return "Center: {}".format(self.owned_by)
+
+class Buying_Session(models.Model):
+    item = models.ForeignKey(Item, related_name="sessions")
+    initiated_by = models.ForeignKey(User, related_name="sessions_initiated")
+    buyers = models.ManyToManyField(User, "orders")
+    distribution_center = models.ForeignKey(Distribution_Center, related_name="sessions")
+    end_date = models.DateTimeField(auto_now=False)
+    created_at = models.DateTimeField(auto_now_add = True)
+    updated_at = models.DateTimeField(auto_now = True)
+    def __str__(self):
+        return "{} by {}, ending: {}".format(self.item, self.initiated_by, self.end_date)
     
 class Postal_Address(models.Model):
     address_1 = models.CharField(max_length=128)
